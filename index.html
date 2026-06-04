@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Mio Ricettario</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5EFE0;
+    --warm-white: #FAF7F0;
+    --parchment: #E8DFC8;
+    --brown-dark: #2C1A0E;
+    --brown-mid: #5C3D1E;
+    --brown-light: #8B6240;
+    --rust: #B85C38;
+    --gold: #C49A3C;
+    --sage: #6B7B5E;
+    --ink: #1A1009;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: var(--cream);
+    color: var(--brown-dark);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(196,154,60,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(184,92,56,0.06) 0%, transparent 50%);
+  }
+
+  /* HEADER */
+  header {
+    background: var(--brown-dark);
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--gold);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    color: var(--cream);
+    letter-spacing: 0.02em;
+  }
+  .logo span { color: var(--gold); font-style: italic; }
+  .header-actions { display: flex; gap: 12px; }
+
+  .btn {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .btn-primary {
+    background: var(--rust);
+    color: var(--warm-white);
+  }
+  .btn-primary:hover { background: #9E4A2A; transform: translateY(-1px); }
+  .btn-gold {
+    background: var(--gold);
+    color: var(--brown-dark);
+  }
+  .btn-gold:hover { background: #A8832A; transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    color: var(--cream);
+    border: 1px solid rgba(245,239,224,0.4);
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--brown-mid);
+    border: 1px solid var(--parchment);
+    font-size: 0.85rem;
+    padding: 7px 16px;
+  }
+  .btn-ghost:hover { background: var(--parchment); }
+  .btn-danger {
+    background: transparent;
+    color: #c0392b;
+    border: 1px solid #c0392b;
+    font-size: 0.85rem;
+    padding: 7px 16px;
+  }
+  .btn-danger:hover { background: #c0392b; color: white; }
+
+  /* MAIN LAYOUT */
+  .app-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  /* SEARCH BAR */
+  .search-bar {
+    position: relative;
+    margin-bottom: 32px;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 16px 50px 16px 20px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.1rem;
+    background: var(--warm-white);
+    border: 2px solid var(--parchment);
+    border-radius: 2px;
+    color: var(--brown-dark);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .search-bar input:focus { border-color: var(--gold); }
+  .search-bar input::placeholder { color: var(--brown-light); font-style: italic; }
+  .search-icon {
+    position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+    color: var(--brown-light); font-size: 1.2rem; pointer-events: none;
+  }
+
+  /* RECIPE LIST */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brown-light);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--parchment);
+  }
+
+  .alpha-group { margin-bottom: 28px; }
+  .alpha-letter {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--gold);
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+
+  .recipe-list { display: flex; flex-direction: column; gap: 2px; }
+  .recipe-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--warm-white);
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .recipe-item:hover {
+    background: var(--parchment);
+    border-left-color: var(--rust);
+    transform: translateX(4px);
+  }
+  .recipe-item-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--brown-dark);
+  }
+  .recipe-item-meta {
+    font-size: 0.85rem;
+    color: var(--brown-light);
+    display: flex; gap: 16px; align-items: center;
+  }
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 1px;
+    background: var(--parchment);
+    color: var(--brown-mid);
+  }
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--brown-light);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state p { font-size: 1.1rem; font-style: italic; }
+
+  /* MODAL */
+  .modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,16,9,0.7);
+    z-index: 200;
+    backdrop-filter: blur(3px);
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+  }
+  .modal-backdrop.open { display: flex; animation: fadeIn 0.2s; }
+  @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+
+  .modal {
+    background: var(--warm-white);
+    width: 100%;
+    max-width: 660px;
+    border-radius: 2px;
+    border-top: 4px solid var(--rust);
+    padding: 36px 40px;
+    position: relative;
+    animation: slideUp 0.25s ease-out;
+  }
+  @keyframes slideUp { from { transform:translateY(20px); opacity:0 } to { transform:translateY(0); opacity:1 } }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--brown-dark);
+    margin-bottom: 6px;
+  }
+  .modal-subtitle {
+    font-size: 0.95rem;
+    color: var(--brown-light);
+    font-style: italic;
+    margin-bottom: 28px;
+  }
+  .modal-close {
+    position: absolute; top: 20px; right: 24px;
+    background: none; border: none; cursor: pointer;
+    font-size: 1.4rem; color: var(--brown-light);
+    transition: color 0.15s; line-height: 1;
+  }
+  .modal-close:hover { color: var(--rust); }
+
+  .form-group { margin-bottom: 20px; }
+  .form-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brown-mid);
+    margin-bottom: 7px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 11px 14px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    background: var(--cream);
+    border: 1.5px solid var(--parchment);
+    border-radius: 2px;
+    color: var(--brown-dark);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--gold); background: var(--warm-white); }
+
+  /* INGREDIENTI */
+  .ingredients-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .ingredient-row { display: flex; gap: 8px; align-items: center; }
+  .ingredient-row .form-input { flex: 1; }
+  .ingredient-row .form-input.qty { width: 110px; flex: none; }
+  .remove-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--brown-light); font-size: 1.1rem;
+    padding: 4px; transition: color 0.15s;
+    line-height: 1; flex-shrink: 0;
+  }
+  .remove-btn:hover { color: var(--rust); }
+
+  /* PASSAGGI */
+  .steps-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .step-row { display: flex; gap: 8px; align-items: flex-start; }
+  .step-number {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--brown-dark); color: var(--cream);
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 8px;
+  }
+  .step-row textarea {
+    flex: 1;
+    min-height: 60px;
+    padding: 9px 12px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.98rem;
+    background: var(--cream);
+    border: 1.5px solid var(--parchment);
+    border-radius: 2px;
+    color: var(--brown-dark);
+    resize: vertical;
+    outline: none;
+    line-height: 1.5;
+    transition: border-color 0.15s;
+  }
+  .step-row textarea:focus { border-color: var(--gold); background: var(--warm-white); }
+
+  .modal-footer { display: flex; gap: 12px; justify-content: flex-end; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--parchment); }
+
+  /* PHOTO SECTION */
+  .photo-drop {
+    border: 2px dashed var(--parchment);
+    border-radius: 2px;
+    padding: 32px;
+    text-align: center;
+    transition: all 0.2s;
+    background: var(--cream);
+  }
+  .photo-drop-icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.5; }
+  .photo-drop p { color: var(--brown-light); font-style: italic; font-size: 0.95rem; }
+  .photo-drop strong { color: var(--rust); }
+  .photo-pick-btn {
+    margin-top: 16px;
+    display: inline-block;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 11px 28px;
+    background: var(--rust);
+    color: var(--warm-white);
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .photo-pick-btn:hover { background: #9E4A2A; }
+  .photo-preview {
+    margin-top: 12px;
+    max-height: 240px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 2px;
+    display: none;
+  }
+
+  /* AI LOADING */
+  .ai-status {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: rgba(196,154,60,0.08);
+    border: 1px solid rgba(196,154,60,0.3);
+    border-radius: 2px;
+    margin-top: 14px;
+    font-style: italic;
+    color: var(--brown-mid);
+  }
+  .ai-status.visible { display: flex; }
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--parchment);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* DETAIL VIEW */
+  .detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--parchment);
+  }
+  .detail-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--brown-dark);
+    line-height: 1.2;
+  }
+  .detail-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .detail-photo {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    display: none;
+  }
+  .ingredients-section { margin-bottom: 28px; }
+  .section-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brown-light);
+    margin-bottom: 14px;
+  }
+  .ingredient-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--parchment);
+    border-radius: 1px;
+    margin: 4px;
+    font-size: 0.95rem;
+  }
+  .ingredient-chip .qty { color: var(--rust); font-weight: 600; }
+  .steps-section { margin-bottom: 24px; }
+  .step-item {
+    display: flex;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--parchment);
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    line-height: 1.3;
+    flex-shrink: 0;
+    width: 28px;
+  }
+  .step-text { font-size: 1.05rem; line-height: 1.6; color: var(--brown-dark); padding-top: 4px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--parchment); }
+  ::-webkit-scrollbar-thumb { background: var(--brown-light); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Il Mio <span>Ricettario</span></div>
+  <div class="header-actions">
+    <button class="btn btn-outline" onclick="openPhotoModal()">📷 Scatta foto</button>
+    <button class="btn btn-primary" onclick="openAddModal()">+ Nuova ricetta</button>
+  </div>
+</header>
+
+<div class="app-container">
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Cerca una ricetta…" oninput="renderList()">
+    <span class="search-icon">🔍</span>
+  </div>
+  <div class="section-title" id="countLabel">Caricamento…</div>
+  <div id="recipeList"></div>
+</div>
+
+<!-- MODAL AGGIUNGI RICETTA -->
+<div class="modal-backdrop" id="addModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    <div class="modal-title" id="addModalTitle">Nuova Ricetta</div>
+    <div class="modal-subtitle" id="addModalSub">Aggiungi una ricetta al tuo ricettario</div>
+
+    <div class="form-group">
+      <label class="form-label">Nome ricetta *</label>
+      <input type="text" id="recipeName" class="form-input" placeholder="es. Risotto alla Milanese">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Porzioni</label>
+      <input type="text" id="recipeServings" class="form-input" placeholder="es. 4 persone">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Ingredienti</label>
+      <div class="ingredients-list" id="ingredientsList"></div>
+      <button class="btn btn-ghost" onclick="addIngredientRow()">+ Aggiungi ingrediente</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Passaggi</label>
+      <div class="steps-list" id="stepsList"></div>
+      <button class="btn btn-ghost" onclick="addStepRow()">+ Aggiungi passaggio</button>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addModal')">Annulla</button>
+      <button class="btn btn-primary" onclick="saveRecipe()">Salva ricetta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOTO AI -->
+<div class="modal-backdrop" id="photoModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('photoModal')">✕</button>
+    <div class="modal-title">📷 Foto → Ricetta</div>
+    <div class="modal-subtitle">Scatta o carica una foto di una ricetta e l'AI la trascriverà automaticamente</div>
+
+    <div class="photo-drop" id="photoDrop">
+      <div class="photo-drop-icon">📸</div>
+      <p>Scatta una foto o scegli un'immagine dalla galleria</p>
+      <button class="photo-pick-btn" onclick="document.getElementById('photoInput').click()">Scegli foto</button>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="onPhotoSelected(this)">
+    <img id="photoPreview" class="photo-preview" alt="Preview">
+
+    <div class="ai-status" id="aiStatus">
+      <div class="spinner"></div>
+      <span id="aiStatusText">Analisi immagine in corso…</span>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('photoModal')">Annulla</button>
+      <button class="btn btn-gold" id="analyzeBtn" onclick="analyzePhoto()" style="display:none;">✨ Analizza con AI</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETTAGLIO RICETTA -->
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal" style="max-width:700px;">
+    <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<script>
+// ─── STORAGE ────────────────────────────────────────────────
+const STORAGE_KEY = 'zanatta_ricettario_v1';
+let recipes = [];
+let editingId = null;
+let photoBase64 = null;
+
+function loadRecipes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    recipes = raw ? JSON.parse(raw) : [];
+  } catch(e) { recipes = []; }
+  if (!recipes.length) loadSampleRecipes();
+}
+
+function saveRecipes() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
+}
+
+function loadSampleRecipes() {
+  recipes = [
+    {
+      id: uid(), name: "Pasta al Pomodoro",
+      servings: "4 persone",
+      ingredients: [
+        {name:"Spaghetti",qty:"400 g"},
+        {name:"Pomodori pelati",qty:"400 g"},
+        {name:"Aglio",qty:"2 spicchi"},
+        {name:"Basilico fresco",qty:"q.b."},
+        {name:"Olio EVO",qty:"4 cucchiai"},
+        {name:"Sale",qty:"q.b."}
+      ],
+      steps: [
+        "Soffriggere l'aglio in olio EVO per 2 minuti a fuoco medio.",
+        "Aggiungere i pomodori pelati schiacciandoli con un cucchiaio.",
+        "Cuocere la salsa per 15-20 minuti, salare e aggiungere il basilico.",
+        "Cuocere gli spaghetti in abbondante acqua salata al dente.",
+        "Scolare la pasta e saltarla in padella con la salsa per 1 minuto."
+      ],
+      photo: null
+    },
+    {
+      id: uid(), name: "Tiramisù Classico",
+      servings: "6 persone",
+      ingredients: [
+        {name:"Mascarpone",qty:"500 g"},
+        {name:"Uova",qty:"4"},
+        {name:"Zucchero",qty:"100 g"},
+        {name:"Savoiardi",qty:"300 g"},
+        {name:"Caffè espresso",qty:"300 ml"},
+        {name:"Cacao amaro",qty:"q.b."}
+      ],
+      steps: [
+        "Separare i tuorli dagli albumi. Montare i tuorli con lo zucchero fino a ottenere un composto chiaro.",
+        "Aggiungere il mascarpone ai tuorli e amalgamare delicatamente.",
+        "Montare gli albumi a neve ferma e incorporarli al composto di mascarpone.",
+        "Inzuppare velocemente i savoiardi nel caffè freddo e disporli in uno strato in una pirofila.",
+        "Versare metà crema sui savoiardi, fare un secondo strato e terminare con la crema.",
+        "Spolverare con cacao amaro e refrigerare per almeno 4 ore."
+      ],
+      photo: null
+    }
+  ];
+  saveRecipes();
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+// ─── RENDER LIST ────────────────────────────────────────────
+function renderList() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const filtered = q
+    ? recipes.filter(r => r.name.toLowerCase().includes(q))
+    : [...recipes];
+  filtered.sort((a,b) => a.name.localeCompare(b.name, 'it'));
+
+  const lbl = document.getElementById('countLabel');
+  lbl.textContent = filtered.length === 0
+    ? 'Nessuna ricetta trovata'
+    : filtered.length === 1 ? '1 Ricetta' : `${filtered.length} Ricette`;
+
+  const container = document.getElementById('recipeList');
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🍽️</div><p>Inizia aggiungendo la tua prima ricetta!</p></div>`;
+    return;
+  }
+
+  // group by first letter
+  const groups = {};
+  filtered.forEach(r => {
+    const l = r.name[0].toUpperCase();
+    if (!groups[l]) groups[l] = [];
+    groups[l].push(r);
+  });
+
+  container.innerHTML = Object.keys(groups).sort().map(letter => `
+    <div class="alpha-group">
+      <div class="alpha-letter">${letter}</div>
+      <div class="recipe-list">
+        ${groups[letter].map(r => `
+          <div class="recipe-item" onclick="openDetail('${r.id}')">
+            <div class="recipe-item-name">${r.name}</div>
+            <div class="recipe-item-meta">
+              ${r.servings ? `<span>${r.servings}</span>` : ''}
+              <span class="tag">${r.ingredients.length} ingr.</span>
+              <span class="tag">${r.steps.length} passaggi</span>
+              ${r.photo ? '<span class="tag">📷</span>' : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── DETAIL ────────────────────────────────────────────────
+function openDetail(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  const html = `
+    <div class="detail-header">
+      <div class="detail-title">${r.name}</div>
+      <div class="detail-actions">
+        <button class="btn btn-ghost" onclick="openEdit('${r.id}')">✏️ Modifica</button>
+        <button class="btn btn-danger" onclick="deleteRecipe('${r.id}')">🗑️ Elimina</button>
+      </div>
+    </div>
+    ${r.photo ? `<img src="${r.photo}" class="detail-photo" style="display:block" alt="${r.name}">` : ''}
+    ${r.servings ? `<p style="color:var(--brown-light);font-style:italic;margin-bottom:20px;">Per ${r.servings}</p>` : ''}
+    <div class="ingredients-section">
+      <div class="section-heading">Ingredienti</div>
+      <div>${r.ingredients.map(i => `
+        <span class="ingredient-chip">
+          ${i.qty ? `<span class="qty">${i.qty}</span>` : ''}
+          <span>${i.name}</span>
+        </span>`).join('')}
+      </div>
+    </div>
+    <div class="steps-section">
+      <div class="section-heading">Procedimento</div>
+      ${r.steps.map((s,i) => `
+        <div class="step-item">
+          <div class="step-num">${i+1}</div>
+          <div class="step-text">${s}</div>
+        </div>`).join('')}
+    </div>`;
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function deleteRecipe(id) {
+  if (!confirm('Eliminare questa ricetta?')) return;
+  recipes = recipes.filter(r => r.id !== id);
+  saveRecipes();
+  closeModal('detailModal');
+  renderList();
+}
+
+// ─── ADD / EDIT MODAL ───────────────────────────────────────
+function openAddModal() {
+  editingId = null;
+  document.getElementById('addModalTitle').textContent = 'Nuova Ricetta';
+  document.getElementById('addModalSub').textContent = 'Aggiungi una ricetta al tuo ricettario';
+  document.getElementById('recipeName').value = '';
+  document.getElementById('recipeServings').value = '';
+  document.getElementById('ingredientsList').innerHTML = '';
+  document.getElementById('stepsList').innerHTML = '';
+  addIngredientRow(); addIngredientRow();
+  addStepRow(); addStepRow();
+  document.getElementById('addModal').classList.add('open');
+}
+
+function openEdit(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  editingId = id;
+  closeModal('detailModal');
+  document.getElementById('addModalTitle').textContent = 'Modifica Ricetta';
+  document.getElementById('addModalSub').textContent = r.name;
+  document.getElementById('recipeName').value = r.name;
+  document.getElementById('recipeServings').value = r.servings || '';
+  // ingredients
+  const il = document.getElementById('ingredientsList');
+  il.innerHTML = '';
+  r.ingredients.forEach(i => addIngredientRow(i.name, i.qty));
+  if (!r.ingredients.length) addIngredientRow();
+  // steps
+  const sl = document.getElementById('stepsList');
+  sl.innerHTML = '';
+  r.steps.forEach(s => addStepRow(s));
+  if (!r.steps.length) addStepRow();
+  document.getElementById('addModal').classList.add('open');
+}
+
+function addIngredientRow(name='', qty='') {
+  const row = document.createElement('div');
+  row.className = 'ingredient-row';
+  row.innerHTML = `
+    <input type="text" class="form-input" placeholder="Ingrediente" value="${escHtml(name)}">
+    <input type="text" class="form-input qty" placeholder="Quantità" value="${escHtml(qty)}">
+    <button class="remove-btn" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('ingredientsList').appendChild(row);
+}
+
+function addStepRow(text='') {
+  const list = document.getElementById('stepsList');
+  const n = list.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'step-row';
+  row.innerHTML = `
+    <div class="step-number">${n}</div>
+    <textarea class="form-input" placeholder="Descrivi il passaggio…">${escHtml(text)}</textarea>
+    <button class="remove-btn" onclick="removeStep(this)" style="margin-top:8px;">✕</button>`;
+  list.appendChild(row);
+}
+
+function removeStep(btn) {
+  btn.parentElement.remove();
+  renumberSteps();
+}
+
+function renumberSteps() {
+  document.querySelectorAll('#stepsList .step-number').forEach((el, i) => el.textContent = i+1);
+}
+
+function saveRecipe() {
+  const name = document.getElementById('recipeName').value.trim();
+  if (!name) { alert('Inserisci il nome della ricetta'); return; }
+  const servings = document.getElementById('recipeServings').value.trim();
+  const ingRows = document.querySelectorAll('#ingredientsList .ingredient-row');
+  const ingredients = [];
+  ingRows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const n = inputs[0].value.trim(), q = inputs[1].value.trim();
+    if (n) ingredients.push({name:n, qty:q});
+  });
+  const stepRows = document.querySelectorAll('#stepsList .step-row textarea');
+  const steps = Array.from(stepRows).map(t => t.value.trim()).filter(Boolean);
+
+  if (editingId) {
+    const r = recipes.find(x => x.id === editingId);
+    if (r) { r.name = name; r.servings = servings; r.ingredients = ingredients; r.steps = steps; }
+  } else {
+    recipes.push({ id: uid(), name, servings, ingredients, steps, photo: null });
+  }
+  saveRecipes();
+  closeModal('addModal');
+  renderList();
+}
+
+// ─── PHOTO / AI ────────────────────────────────────────────
+function openPhotoModal() {
+  photoBase64 = null;
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('analyzeBtn').style.display = 'none';
+  document.getElementById('aiStatus').classList.remove('visible');
+  document.getElementById('photoInput').value = '';
+  document.getElementById('photoModal').classList.add('open');
+}
+
+function onPhotoSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const src = e.target.result;
+    document.getElementById('photoPreview').src = src;
+    document.getElementById('photoPreview').style.display = 'block';
+    photoBase64 = src.split(',')[1];
+    document.getElementById('analyzeBtn').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzePhoto() {
+  if (!photoBase64) return;
+  const status = document.getElementById('aiStatus');
+  status.classList.add('visible');
+  document.getElementById('aiStatusText').textContent = 'Analisi immagine in corso…';
+  document.getElementById('analyzeBtn').disabled = true;
+
+  try {
+    const prompt = `Analizza questa immagine che contiene una ricetta (scritta su carta, in un libro, su schermo, ecc.).
+Estrai tutte le informazioni e restituisci SOLO un oggetto JSON con questa struttura esatta, senza testo aggiuntivo né markdown:
+{
+  "name": "Nome della ricetta",
+  "servings": "Per N persone (o stringa vuota se non indicato)",
+  "ingredients": [
+    {"name": "nome ingrediente", "qty": "quantità con unità di misura"}
+  ],
+  "steps": ["Passaggio 1 completo.", "Passaggio 2 completo.", "..."]
+}
+Se non riesci a leggere la ricetta, restituisci {"error": "Non riesco a leggere la ricetta nell'immagine"}.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: photoBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.map(c => c.text || '').join('') || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    if (parsed.error) {
+      status.classList.remove('visible');
+      alert('⚠️ ' + parsed.error);
+      document.getElementById('analyzeBtn').disabled = false;
+      return;
+    }
+
+    // Pre-compila il form aggiungi con i dati estratti
+    closeModal('photoModal');
+
+    editingId = null;
+    document.getElementById('addModalTitle').textContent = '✨ Ricetta da Foto';
+    document.getElementById('addModalSub').textContent = 'Controlla e correggi i dati estratti dall\'AI';
+    document.getElementById('recipeName').value = parsed.name || '';
+    document.getElementById('recipeServings').value = parsed.servings || '';
+    document.getElementById('ingredientsList').innerHTML = '';
+    document.getElementById('stepsList').innerHTML = '';
+    (parsed.ingredients || []).forEach(i => addIngredientRow(i.name, i.qty));
+    if (!(parsed.ingredients||[]).length) addIngredientRow();
+    (parsed.steps || []).forEach(s => addStepRow(s));
+    if (!(parsed.steps||[]).length) addStepRow();
+
+    // salva la foto nella ricetta (verrà applicata al salvataggio)
+    window._pendingPhoto = 'data:image/jpeg;base64,' + photoBase64;
+
+    document.getElementById('addModal').classList.add('open');
+
+  } catch(err) {
+    status.classList.remove('visible');
+    alert('Errore durante l\'analisi: ' + err.message);
+    document.getElementById('analyzeBtn').disabled = false;
+  }
+}
+
+// Override saveRecipe to attach pending photo
+const _origSave = saveRecipe;
+window.saveRecipe = function() {
+  const name = document.getElementById('recipeName').value.trim();
+  if (!name) { alert('Inserisci il nome della ricetta'); return; }
+  const servings = document.getElementById('recipeServings').value.trim();
+  const ingRows = document.querySelectorAll('#ingredientsList .ingredient-row');
+  const ingredients = [];
+  ingRows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const n = inputs[0].value.trim(), q = inputs[1].value.trim();
+    if (n) ingredients.push({name:n, qty:q});
+  });
+  const stepRows = document.querySelectorAll('#stepsList .step-row textarea');
+  const steps = Array.from(stepRows).map(t => t.value.trim()).filter(Boolean);
+  const photo = window._pendingPhoto || null;
+  window._pendingPhoto = null;
+
+  if (editingId) {
+    const r = recipes.find(x => x.id === editingId);
+    if (r) { r.name = name; r.servings = servings; r.ingredients = ingredients; r.steps = steps; if(photo) r.photo=photo; }
+  } else {
+    recipes.push({ id: uid(), name, servings, ingredients, steps, photo });
+  }
+  saveRecipes();
+  closeModal('addModal');
+  renderList();
+};
+
+// ─── UTILS ─────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
+});
+
+// ─── INIT ───────────────────────────────────────────────────
+loadRecipes();
+renderList();
+</script>
+</body>
+</html>
