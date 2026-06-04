@@ -144,7 +144,8 @@
 <header>
   <div class="logo">Il Mio <span>Ricettario</span></div>
   <div class="header-actions">
-    <button class="btn btn-outline" onclick="openPhotoModal()">📷 Foto</button>
+    <button class="btn btn-outline" onclick="document.getElementById('importJsonInput').click()">📥 Importa</button>
+    <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="importJson(this)">
     <button class="btn btn-primary" onclick="openAddModal()">+ Ricetta</button>
   </div>
 </header>
@@ -495,6 +496,40 @@ Se non riesci a leggere la ricetta: {"error":"Non riesco a leggere la ricetta"}`
     alert('Errore analisi: ' + err.message);
     document.getElementById('analyzeBtn').disabled = false;
   }
+}
+
+// ─── IMPORT JSON ─────────────────────────────────────────────
+window.importJson = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      // Supporta sia singola ricetta {} che array []
+      const items = Array.isArray(parsed) ? parsed : [parsed];
+      let count = 0;
+      setSyncStatus('loading', 'Importazione…');
+      for (const r of items) {
+        if (!r.name) continue;
+        await addDoc(colRef, {
+          name: r.name || '',
+          servings: r.servings || '',
+          ingredients: r.ingredients || [],
+          steps: r.steps || [],
+          photo: r.photo || null
+        });
+        count++;
+      }
+      setSyncStatus('ok', 'Sincronizzato');
+      alert(`✅ ${count} ricetta${count !== 1 ? 'e' : ''} importata${count !== 1 ? 'e' : ''} con successo!`);
+    } catch(err) {
+      setSyncStatus('err', 'Errore importazione');
+      alert('Errore nel file JSON: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // ─── UTILS ───────────────────────────────────────────────────
