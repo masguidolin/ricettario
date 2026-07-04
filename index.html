@@ -248,6 +248,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDfgtQt8UFoZ6fv0Sr7PQOnozk_t5KWsZs",
@@ -260,7 +261,16 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 const colRef = collection(db, "ricette");
+
+// ─── LOGIN ANONIMO ───────────────────────────────────────────
+// Necessario perché le regole di sicurezza Firestore richiedono
+// un utente autenticato (anche se anonimo) per leggere/scrivere.
+signInAnonymously(auth).catch((error) => {
+  console.error("Errore login anonimo:", error);
+  setSyncStatus('err', 'Errore autenticazione');
+});
 
 // ─── STATO ───────────────────────────────────────────────────
 let recipes = [];
@@ -275,13 +285,19 @@ function setSyncStatus(state, text) {
 }
 
 // ─── FIRESTORE LISTENER ──────────────────────────────────────
-onSnapshot(colRef, (snap) => {
-  recipes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  setSyncStatus('ok', 'Sincronizzato');
-  renderList();
-}, (err) => {
-  setSyncStatus('err', 'Errore connessione');
-  console.error(err);
+// Il listener parte solo dopo che l'utente anonimo è autenticato,
+// altrimenti Firestore rifiuterebbe la richiesta (regole di sicurezza).
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    onSnapshot(colRef, (snap) => {
+      recipes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setSyncStatus('ok', 'Sincronizzato');
+      renderList();
+    }, (err) => {
+      setSyncStatus('err', 'Errore connessione');
+      console.error(err);
+    });
+  }
 });
 
 // ─── RENDER ──────────────────────────────────────────────────
