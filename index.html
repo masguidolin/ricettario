@@ -267,8 +267,10 @@ const colRef = collection(db, "ricette");
 // ─── LOGIN ANONIMO ───────────────────────────────────────────
 // Necessario perché le regole di sicurezza Firestore richiedono
 // un utente autenticato (anche se anonimo) per leggere/scrivere.
-signInAnonymously(auth).catch((error) => {
-  console.error("Errore login anonimo:", error);
+signInAnonymously(auth).then(() => {
+  console.log("DEBUG: signInAnonymously RIUSCITO");
+}).catch((error) => {
+  console.error("DEBUG: Errore login anonimo:", error.code, error.message);
   setSyncStatus('err', 'Errore autenticazione');
 });
 
@@ -288,6 +290,7 @@ function setSyncStatus(state, text) {
 // Il listener parte solo dopo che l'utente anonimo è autenticato,
 // altrimenti Firestore rifiuterebbe la richiesta (regole di sicurezza).
 onAuthStateChanged(auth, (user) => {
+  console.log("DEBUG: onAuthStateChanged - user:", user ? user.uid : null);
   if (user) {
     onSnapshot(colRef, (snap) => {
       recipes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
